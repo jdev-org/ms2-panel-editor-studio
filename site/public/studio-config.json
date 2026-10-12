@@ -1,0 +1,15 @@
+{
+  "defaultWmsService": "avis-urbanisme-local",
+  "wmsServices": [
+    {
+      "id": "avis-urbanisme-local",
+      "label": "Local — Avis urbanisme",
+      "url": "http://localhost:82/geoserver/data/wms?service=WMS&version=1.1.0&request=GetMap&layers=data%3Aavis_urbanisme"
+    },
+    {
+      "id": "geoserver-local",
+      "label": "Local — Toutes les couches GeoServer",
+      "url": "http://localhost:82/geoserver/wms"
+    }
+  ]
+}

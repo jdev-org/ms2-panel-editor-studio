@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Configurez les champs, les droits et les règles de saisie de vos couches MapStore avec Panel Editor Studio.">
+  <meta name="theme-color" content="#142d2c">
+  <title>Panel Editor Studio</title>
+  <link rel="icon" type="image/svg+xml" href="./favicon.svg">
+  <link rel="stylesheet" href="./style.css">
+  <script type="module" src="./app.mjs"></script>
+</head>
+<body>
+  <a class="skip-link" href="#main">Aller au contenu</a>
+  <header class="topbar">
+    <a class="brand" href="./"><span class="brand-mark" aria-hidden="true">▦</span><span>Panel Editor <strong>Studio</strong><small>Le configurateur de vos attributs MapStore</small></span></a>
+    <span class="topbar-tag">Du service cartographique au formulaire</span>
+    <button id="demo" class="button subtle">Essayer un exemple</button>
+  </header>
+  <div class="shell">
+    <aside class="sidebar" aria-label="Étapes de configuration">
+      <div class="sidebar-label">VOTRE CONFIGURATION</div>
+      <nav class="steps">
+        <button data-step="source" class="step active" aria-current="step"><span class="step-number">01</span><span>La couche<small>Connecter votre service</small></span></button>
+        <button data-step="settings" class="step"><span class="step-number">02</span><span>Paramètres généraux<small>Panneau et couche</small></span></button>
+        <button data-step="fields" class="step"><span class="step-number">03</span><span>Les champs<small>Composer votre formulaire</small></span></button>
+        <button data-step="export" class="step"><span class="step-number">04</span><span>Le JSON<small>Prêt pour MapStore</small></span></button>
+      </nav>
+      <div class="layer-summary"><div class="layer-summary-heading"><span class="sidebar-label">COUCHE ACTIVE</span><span class="badge">ACTIVE</span></div><strong id="summary-title">Aucune couche</strong><code id="summary-name">Connectez un service WMS</code><div id="summary-count">0 attribut</div></div>
+      <div class="sidebar-tip"><strong>Des attributs toujours visibles</strong><p>Les conditions activent la saisie. Elles ne masquent pas vos champs.</p></div>
+      <button id="manual" class="button outline">Commencer manuellement</button>
+      <small class="sidebar-footer">Sans compte. Sans installation.<br>Vos réglages restent dans cet onglet.</small>
+    </aside>
+    <main id="main" tabindex="-1">
+      <div id="notification" class="notification" role="status" aria-live="polite" hidden></div>
+      <section id="page-source" class="page" aria-labelledby="source-title">
+        <div class="page-heading"><span class="eyebrow">ÉTAPE 01 / CONNEXION</span><h1 id="source-title">Tout commence par une couche.</h1><p>Récupérez ses attributs, puis construisez le formulaire qui vous ressemble.</p></div>
+        <form id="source-form" class="card source-card">
+          <div class="card-heading"><span class="card-icon" aria-hidden="true">↗</span><div><h2>Votre service WMS</h2><p>Une URL de service ou de requête GetMap convient.</p></div></div>
+          <label for="wms-preset">Services WMS proposés</label>
+          <select id="wms-preset" disabled><option value="">Chargement des services…</option></select>
+          <p id="wms-preset-hint" class="hint">Choisissez un service proposé ou saisissez votre propre URL.</p>
+          <label for="wms-url">URL du service</label>
+          <div class="inline"><input id="wms-url" type="url" placeholder="https://votre-serveur.fr/geoserver/wms" required autocomplete="off"><button id="explore" class="button primary" type="submit">Explorer les couches <span aria-hidden="true">→</span></button></div>
+          <p class="hint">Le navigateur interroge directement votre serveur. Il doit autoriser les accès CORS ; depuis GitHub Pages, utilisez une URL HTTPS.</p>
+          <button class="button outline small" type="button" data-action="manual-start">Configurer sans service accessible</button>
+        </form>
+        <div id="layer-card" class="card" hidden>
+          <div class="card-heading"><span class="card-icon" aria-hidden="true">▱</span><div><h2>Choisir une couche</h2><p id="layers-found"></p></div></div>
+          <label for="layer-search">Rechercher une couche</label><input id="layer-search" type="search" placeholder="Nom ou titre de la couche">
+          <label for="layer-select">Couche</label><select id="layer-select"></select><p id="layer-description" class="hint"></p>
+          <details class="technical"><summary>Service WFS et nom technique</summary><p class="hint">Le WMS décrit les couches. Le WFS décrit leurs attributs. Ces valeurs sont détectées si possible et restent modifiables.</p><div class="grid two"><div><label for="wfs-url">URL du service WFS</label><input id="wfs-url" type="url" placeholder="https://votre-serveur.fr/geoserver/wfs"></div><div><label for="type-name">Nom du type WFS</label><input id="type-name" placeholder="workspace:couche"></div></div></details>
+          <div class="card-footer"><span class="hint">Les géométries sont exclues du formulaire.</span><button id="read-fields" class="button primary">Lire les attributs <span aria-hidden="true">→</span></button></div>
+        </div>
+        <div class="features"><div><span class="feature-number">01</span><h3>Les bons types</h3><p>Texte, nombre et date sont proposés depuis le schéma WFS.</p></div><div><span class="feature-number">02</span><h3>Vos règles métier</h3><p>Listes, conditions, rôles et validation, sans écrire le JSON.</p></div><div><span class="feature-number">03</span><h3>Un résultat réutilisable</h3><p>Copiez la configuration ou téléchargez-la pour votre carte.</p></div></div>
+      </section>
+      <section id="page-settings" class="page" hidden aria-labelledby="settings-title">
+        <div class="page-heading"><span class="eyebrow">ÉTAPE 02 / PARAMÈTRES GÉNÉRAUX</span><h1 id="settings-title">Les réglages de votre panneau.</h1><p>Services, droits et visibilité : définissez le cadre commun à tous vos attributs.</p></div>
+        <div class="card"><h2>Le panneau</h2><p class="hint">Ces options s'appliquent à l'ensemble du plugin.</p><div id="general-settings-content"></div></div>
+        <div id="layer-settings" class="card"><h2>La couche</h2><p class="hint">Identification et droits communs à ses attributs.</p><div id="layer-settings-content"></div></div>
+        <div class="card"><h2>Visibilité des attributs</h2><p class="hint" id="visibility-hint">Sélectionnez plusieurs champs avec Ctrl/⌘ + clic ou Maj + clic, puis utilisez les flèches. Les champs masqués en consultation restent disponibles en édition lorsqu'ils sont déclarés dans la configuration.</p>
+          <div class="visibility-transfer"><div><label for="visible-fields">Visibles <span id="visible-count" class="badge">0</span></label><select id="visible-fields" multiple size="10" aria-describedby="visibility-hint"></select></div><div class="transfer-buttons"><button id="hide-fields" class="button outline" aria-label="Masquer les champs sélectionnés" title="Masquer les champs sélectionnés" disabled>→</button><button id="show-fields" class="button outline" aria-label="Rendre visibles les champs sélectionnés" title="Rendre visibles les champs sélectionnés" disabled>←</button></div><div><label for="hidden-fields">Masqués <span id="hidden-count" class="badge">0</span></label><select id="hidden-fields" multiple size="10" aria-describedby="visibility-hint"></select></div></div>
+        </div>
+        <div class="page-footer"><span class="hint">Les réglages sont intégrés au JSON exporté.</span><button data-step="fields" class="button primary">Configurer les attributs →</button></div>
+      </section>
+      <section id="page-fields" class="page" hidden aria-labelledby="fields-title">
+        <div class="page-heading compact"><span class="eyebrow">ÉTAPE 03 / FORMULAIRE</span><h1 id="fields-title">Chaque champ a son rôle.</h1><p>Ajustez les contrôles et leurs règles. Le JSON se construit au fil de vos choix.</p><button class="button small outline" data-step="settings">Paramètres généraux</button></div>
+        <div class="fields-workspace"><aside class="card fields-list-panel"><div class="list-heading"><h2>Attributs <span id="field-count" class="badge">0</span></h2><button id="add-field" class="button small outline">+ Ajouter</button></div><label class="sr-only" for="field-search">Rechercher un attribut</label><input id="field-search" type="search" placeholder="Rechercher un attribut…"><div id="field-list" class="field-list"></div></aside><div id="field-editor" class="card field-editor"></div></div>
+        <div class="page-footer"><span id="config-status" class="hint"></span><button data-step="export" class="button primary">Voir le JSON <span aria-hidden="true">→</span></button></div>
+      </section>
+      <section id="page-export" class="page" hidden aria-labelledby="export-title">
+        <div class="page-heading"><span class="eyebrow">ÉTAPE 04 / EXPORT</span><h1 id="export-title">Votre formulaire, en JSON.</h1><p>Une configuration prête à intégrer dans votre extension Panel Editor.</p></div>
+        <div class="export-grid"><div class="card code-card"><div class="code-heading"><span><span class="status-dot"></span> panelEditor.json</span><span id="export-count"></span></div><pre id="json-preview" tabindex="0" aria-label="Configuration JSON"></pre></div><aside class="export-tools"><div class="card"><h2>Exporter la configuration</h2><label for="export-scope">Format de sortie</label><select id="export-scope"><option value="plugin">Plugin complet : name + cfg</option><option value="cfg">Configuration cfg uniquement</option><option value="layer">Configuration de la couche</option></select><button id="download" class="button primary full">↓ Télécharger le JSON</button><button id="copy" class="button outline full">Copier dans le presse-papiers</button><p class="hint">La configuration du plugin se place dans <code>plugins.desktop</code> de <code>localConfig.json</code>.</p></div><div id="export-validation" class="card"></div><div class="card muted-card"><h3>Et ensuite ?</h3><p>Ajoutez Panel Editor à votre contexte MapStore, collez la configuration et testez la saisie sur votre couche.</p><p>Le service doit permettre les transactions WFS-T pour enregistrer les modifications.</p></div></aside></div>
+      </section>
+      <footer class="main-footer"><span>Panel Editor Studio</span><span>Une configuration claire, champ par champ.</span></footer>
+    </main>
+  </div>
+  <noscript>Activez JavaScript pour utiliser le configurateur.</noscript>
+</body>
+</html>

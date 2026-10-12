@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="fr">
+<meta charset="utf-8">
+<title>Tests XML du Studio</title>
+<h1>Tests WMS/WFS dans le navigateur</h1>
+<p>Ces tests utilisent le DOMParser natif, sans requête distante.</p>
+<pre id="results" aria-live="polite"></pre>
+<script type="module">
+import { parseCapabilities, parseDescribeLayer, parseXmlSchema } from "../site/ogc.mjs";
+const result = document.getElementById("results");
+let failed = 0;
+function equal(actual, expected) {
+  if (JSON.stringify(actual) !== JSON.stringify(expected)) throw new Error(`Attendu ${JSON.stringify(expected)}, obtenu ${JSON.stringify(actual)}`);
+}
+function test(name, run) {
+  try { run(); result.textContent += `✓ ${name}\n`; }
+  catch (error) { failed++; result.textContent += `✗ ${name} : ${error.message}\n`; }
+}
+test("Couches WMS imbriquées et XML avec espace de noms", () => {
+  const layers = parseCapabilities('<WMS_Capabilities xmlns="http://www.opengis.net/wms"><Capability><Layer><Title>Root</Title><Layer><Name>ws:roads</Name><Title>Routes &amp; chemins</Title></Layer></Layer></Capability></WMS_Capabilities>');
+  equal(layers, [{ name: "ws:roads", title: "Routes & chemins", abstract: "" }]);
+});
+test("DescribeLayer sélectionne la bonne couche et résout une URL relative", () => {
+  const description = parseDescribeLayer('<WMS_DescribeLayerResponse><LayerDescription name="ws:other" owsType="WCS"/><LayerDescription name="ws:roads" owsType="WFS" owsURL="./wfs"><Query typeName="ws:roads"/></LayerDescription></WMS_DescribeLayerResponse>', "https://example.org/geoserver/wms", "ws:roads");
+  equal(description, { wfsUrl: "https://example.org/geoserver/wfs", typeName: "ws:roads" });
+});
+test("Les couches raster WCS ne sont pas décrites comme du WFS", () => {
+  equal(parseDescribeLayer('<WMS_DescribeLayerResponse><LayerDescription name="ws:raster" owsType="WCS" owsURL="https://example.org/wcs"/></WMS_DescribeLayerResponse>', "https://example.org/wms", "ws:raster"), null);
+});
+test("Schéma XSD : types, obligations et exclusion des géométries", () => {
+  const fields = parseXmlSchema('<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:gml="http://www.opengis.net/gml"><xs:element name="roads" type="roadsType"/><xs:complexType name="roadsType"><xs:complexContent><xs:extension base="gml:AbstractFeatureType"><xs:sequence><xs:element name="geom" type="gml:LineStringPropertyType"/><xs:element name="name" type="xs:string" minOccurs="0"/><xs:element name="amount" type="xs:decimal" nillable="true"/><xs:element name="date" type="xs:date"/></xs:sequence></xs:extension></xs:complexContent></xs:complexType></xs:schema>', "ws:roads");
+  equal(fields.map(field => [field.name, field.type, field.required]), [["name", "string", false], ["amount", "number", false], ["date", "date", true]]);
+});
+test("Les exceptions OGC sont affichées comme erreurs", () => {
+  try { parseCapabilities('<ServiceExceptionReport><ServiceException>Accès refusé</ServiceException></ServiceExceptionReport>'); }
+  catch (error) { equal(error.message, "Accès refusé"); return; }
+  throw new Error("L'exception n'a pas été détectée.");
+});
+test("Un XML mal formé est refusé", () => {
+  try { parseCapabilities('<WMS_Capabilities><Layer>'); }
+  catch { return; }
+  throw new Error("Le XML invalide n'a pas été détecté.");
+});
+result.textContent += `\n${failed ? `${failed} échec(s)` : "Tous les tests ont réussi."}`;
+document.title = failed ? "ÉCHEC — tests du Studio" : "OK — tests du Studio";
+</script>
+</html>
